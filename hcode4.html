@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #74ebd5, #acb6e5);
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-top: 30px;
+        }
+
+        .container {
+            width: 400px;
+            margin: 30px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        input {
+            width: 70%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .add-btn {
+            background-color: #4CAF50;
+            color: white;
+            margin-left: 5px;
+        }
+
+        .add-btn:hover {
+            background-color: #45a049;
+        }
+
+        .delete-btn {
+            background-color: red;
+            color: white;
+            margin-left: 10px;
+        }
+
+        .delete-btn:hover {
+            background-color: darkred;
+        }
+        .update-btn {
+    background-color: orange;
+    color: white;
+    margin-right: 5px;
+}
+
+.update-btn:hover {
+    background-color: darkorange;
+}
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+
+        li {
+            background: #f9f9f9;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        </style>
+    </head>
+    <body>
+        <div class="container">
+        <h1>
+            USER MANAGEMENT SYSTEM
+        </h1>
+        <input type="text"id="in"placeholder="ENTER NAME">
+        <ul id="list"></ul>
+        <button onclick="addUsers()" class="add-btn">PRESS</button>
+        <script>
+            function addUsers(){
+                let name=document.getElementById("in").value;
+                fetch("http://localhost:8080/addUsers",{
+                    method:"POST",
+                    headers:{
+                        "Content-type":"application/json"
+                    },
+                    body:JSON.stringify({"name":name})
+
+                }).then(Response=>Response.json()).then(()=>loadUsers());
+            };
+            function loadUsers(){
+               fetch("http://localhost:8080/users").then(Response=>Response.json()).then(data=>{
+                let list=document.getElementById("list");
+                list.innerHTML=""
+                data.forEach(user => {
+                    let lie=document.createElement("li");
+                    lie.innerHTML=`${user.id}-${user.name} <button onclick=deleteUser(${user.id}) class="delete-btn">DELETE<button>
+                        <button onclick=updateUser(${user.id},'${user.name}') class="update-btn">UPDATE</button>`
+                    list.appendChild(lie);
+                });
+            })
+            
+
+            }
+            function deleteUser(id){
+                fetch("http://localhost:8080/deleteUser/"+id,{
+                    method:"DELETE"
+
+                }).then(()=>loadUsers());
+
+            }
+            function updateUser(id,oldname){
+                let newuser=prompt("Enter name:",oldname);
+                if(newuser){
+                    fetch("http://localhost:8080/updateUser/"+id,{
+                        method:"PUT",
+                        headers:{
+                            "Content-type":"application/json"
+                        },
+                        body:JSON.stringify({name:newuser})
+                    }).then(()=>loadUsers());
+                
+                }
+            };  
+            
+
+            loadUsers();
+        </script>
+        </div>
+    </body>
+</html>
